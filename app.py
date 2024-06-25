@@ -1,18 +1,7 @@
-# Copyright (c) 2013 Shotgun Software Inc.
-#
-# CONFIDENTIAL AND PROPRIETARY
-#
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
-# Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
-# not expressly granted therein are reserved by Shotgun Software Inc.
-
-
 from sgtk.platform import Application
 
 
-class SgtkStarterApp(Application):
+class SgtkDefconApp(Application):
     """
     The app entry point. This class is responsible for initializing and tearing down
     the application, handle menu registration etc.
@@ -38,4 +27,4 @@ class SgtkStarterApp(Application):
         menu_callback = lambda: app_payload.dialog.show_dialog(self)
 
         # now register the command with the engine
-        self.engine.register_command("Show Starter Template App...", menu_callback)
+        self.engine.register_command("Defcon Settings...", menu_callback)
