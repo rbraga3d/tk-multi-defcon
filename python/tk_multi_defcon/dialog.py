@@ -54,6 +54,7 @@ class AppDialog(QtGui.QWidget):
         # most of the useful accessors are available through the Application class instance
         # it is often handy to keep a reference to this. You can get it via the following method:
         self._app = sgtk.platform.current_bundle()
+        
 
         # logging happens via a standard toolkit logger
         logger.info("Launching Defcon Application...")

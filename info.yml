@@ -13,6 +13,13 @@
 # expected fields in the configuration file for this engine
 configuration:
 
+ hook_root_config_path:
+        type: hook
+        default_value: "{self}/root_configs_path.py"
+        description: >
+          Hook that will get the defcon configs root path that contains
+          all defcon configurations (render settings, arnold settings, etc)
+
 # this app works in all engines - it does not contain
 # any host application specific commands
 supported_engines:
@@ -21,8 +28,8 @@ supported_engines:
 requires_shotgun_fields:
 
 # More verbose description of this item
-display_name: "Flow Production Tracking Toolkit Starter"
-description: "Template App to quickly get up and running with the Flow Production Tracking Toolkit."
+display_name: "Studio Defcon"
+description: "Defcon app that configures all project standard and mandatory settings"
 
 # Required minimum versions for this item to run
 requires_shotgun_version:
