@@ -13,12 +13,11 @@
 # expected fields in the configuration file for this engine
 configuration:
 
- hook_root_config_path:
+ hook_root_configs_path:
         type: hook
         default_value: "{self}/root_configs_path.py"
-        description: >
-          Hook that will get the defcon configs root path that contains
-          all defcon configurations (render settings, arnold settings, etc)
+        description: Hook that will get the defcon configs root path that contains
+                     all defcon configurations (render settings, arnold settings, etc)
 
 # this app works in all engines - it does not contain
 # any host application specific commands

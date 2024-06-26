@@ -17,7 +17,7 @@ class DefConApp(Application):
         # and business logic of the app is kept. By using the import_module command,
         # toolkit's code reload mechanism will work properly.
         defcon_module = self.import_module("tk_multi_defcon")
-        self._manager = defcon_module.manager.DefConManager(self)
+        self._manager = defcon_module.manager.create_defcon_manager(self)
 
 
         # now register a *command*, which is normally a menu entry of some kind on a Shotgun
@@ -33,12 +33,12 @@ class DefConApp(Application):
 
 
 
-        file_path = self.execute_hook_method(
-            "hook_root_configs_path",
-            "get_root_configs_path"
-        )
+        # file_path = self.execute_hook_method(
+        #     "hook_root_configs_path",
+        #     "get_root_configs_path"
+        # )
 
-        pprint("ROOT PATH = " + file_path)
+        # pprint("ROOT PATH = " + file_path)
 
 
 
