@@ -1,6 +1,8 @@
 from pprint import pprint
 
 import maya.cmds as cmds
+import maya.mel as mel
+
 from tank_vendor import yaml
 
 from .constants import (
@@ -60,8 +62,9 @@ class MayaDefConManager(DefConManager):
             attributes_prefix = key
             attributes_settings = value
 
-            defaults_attributes = attributes_settings.get("defaults")
-            connections_attributes = attributes_settings.get("connections")
+            defaults_attributes = attributes_settings.get("defaults", {})
+            connections_attributes = attributes_settings.get("connections", {})
+            others_attributes = attributes_settings.get("others", {})
 
             # ========================================================
             # DEFAULTS ATTRIBUTES
@@ -78,14 +81,48 @@ class MayaDefConManager(DefConManager):
 
                     cmds.setAttr(full_attr_name, attr_value)
                 except Exception as e:
-                    self._defcon_app.log_error(e)
+                    self._defcon_app.log_error(
+                        "Could not set {} attribute. "
+                        "Error: {}"
+                        .format(full_attr_name, e)
+                    )
 
             # ========================================================
             # CONNECTIONS ATTRIBUTES
             # ========================================================
             for attr_name, attr_value in connections_attributes.items():
                 full_attr_name = "{}.{}".format(attributes_prefix, attr_name)
-                cmds.connectAttr(attr_value, full_attr_name, f=True)
+
+                try:
+                    cmds.connectAttr(full_attr_name, attr_value, f=True)
+                    continue
+                except Exception as e:
+                    self._defcon_app.log_error(
+                        "Could not connect {} attribute. "
+                        "Error: {}"
+                        .format(full_attr_name, e)
+                    )
+
+            # ========================================================
+            # OTHERS ATTRIBUTES
+            # ========================================================
+            # We need to set some attributes differently as their
+            # configurations are set up using maya mel procedurals
+            for attr_name, attr_value in others_attributes.items():
+                try:
+                    # Frame/Animation ext:
+                    if attr_name == "setMayaSoftwareFrameExt":
+                        mel.eval(
+                            'setMayaSoftwareFrameExt("{}", 0)'.format(attr_value)
+                        )
+
+                        continue
+                except Exception as e:
+                    self._defcon_app.log_error(
+                        "Could not set {} attribute. "
+                        "Error: {}"
+                        .format(attr_name, e)
+                    )
 
 
     def configure_render_settings(self, config_data):

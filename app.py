@@ -34,13 +34,5 @@ class DefConApp(Application):
 
 
 
-        # file_path = self.execute_hook_method(
-        #     "hook_root_configs_path",
-        #     "get_root_configs_path"
-        # )
-
-        # pprint("ROOT PATH = " + file_path)
-
-
 
         
