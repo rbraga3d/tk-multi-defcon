@@ -49,13 +49,15 @@ class DefConManager:
     
 class MayaDefConManager(DefConManager):
 
+    # keys defined in the render_settings.yaml file
     _COMMOM_SETTINGS_NAME = "common"
+    _ARNOLD_SETTINGS_NAME = "arnold"
 
     def __init__(self, defcon_app):
         super(MayaDefConManager, self).__init__(defcon_app)
 
         config_data = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
-        self.configure_common_settings(config_data)
+        self.configure_arnold_settings(config_data)
 
     def _configure_settings_attributes(self, settings):
         for key, value in settings.items():
@@ -107,7 +109,7 @@ class MayaDefConManager(DefConManager):
             # OTHERS ATTRIBUTES
             # ========================================================
             # We need to set some attributes differently as their
-            # configurations are set up using maya mel procedurals
+            # values are set up using maya mel procedurals
             for attr_name, attr_value in others_attributes.items():
                 try:
                     # Frame/Animation ext:
@@ -125,9 +127,6 @@ class MayaDefConManager(DefConManager):
                     )
 
 
-    def configure_render_settings(self, config_data):
-        pass
-
     def configure_common_settings(self, config_data):
         common_settings = config_data.get(self._COMMOM_SETTINGS_NAME)
         if not common_settings:
@@ -139,17 +138,25 @@ class MayaDefConManager(DefConManager):
         
         self._configure_settings_attributes(common_settings)
         
-
-
-        
-
     def configure_arnold_settings(self, config_data):
-        pass
+        arnold_settings = config_data.get(self._ARNOLD_SETTINGS_NAME)
+        if not arnold_settings:
+            self._log_warning_no_settings_found(
+                self._ARNOLD_SETTINGS_NAME,
+                RENDER_SETTINGS_CONFIG_FILE
+            )
+            return
+        
+        self._configure_settings_attributes(arnold_settings)
+
 
     def configure_redshift_settings(self, config_data):
         pass
 
     def configure_vray_settings(self, config_data):
+        pass
+
+    def configure_render_settings(self, config_data):
         pass
 
 
