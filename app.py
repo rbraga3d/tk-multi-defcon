@@ -7,6 +7,7 @@ class DefConApp(Application):
     the application, handle menu registration etc.
     """
 
+
     def init_app(self):
         """
         Called as the application is being initialized

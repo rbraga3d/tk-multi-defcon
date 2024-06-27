@@ -1,10 +1,10 @@
+from pprint import pprint
+
+import maya.cmds as cmds
 from tank_vendor import yaml
 
 from .constants import (
-    RENDER_SETTINGS_FILE,
-    ARNOLD_SETTINGS_FILE,
-    REDSHIFT_SETTINGS_FILE,
-    VRAY_SETTINGS_FILE
+    RENDER_SETTINGS_CONFIG_FILE,
 )
 from .file_manager import DefconFileManager
 
@@ -17,28 +17,102 @@ class DefConManager:
 
 
     def _get_config(self, config_name):
+        """
+        Returns the config for the given config name
+        return type: dict
+        """
         config_path = self._file_manager.get_config_file_path(config_name)
-        return config_path
+
+        try:
+            with open(config_path, 'r') as config_file:
+                return yaml.safe_load(config_file)
+            
+        except FileNotFoundError:
+            self._defcon_app.log_error(
+                "Config file not found: {}. "
+                "Defcon for {} will be skipped"
+                .format(config_path, config_name.split(".")[0].upper())
+                
+            )
+
+        return {}
+    
+    def _log_warning_no_settings_found(self, settings_name, config_name):
+        self._defcon_app.log_warning(
+            "No {} settings found in the {} file. "
+            "Defcon for common settings will be skipped."
+            .format(settings_name, config_name)
+        )
 
     
 class MayaDefConManager(DefConManager):
 
+    _COMMOM_SETTINGS_NAME = "common"
+
     def __init__(self, defcon_app):
         super(MayaDefConManager, self).__init__(defcon_app)
 
-        config_file = self._get_config(RENDER_SETTINGS_FILE)
-        print("CONFIG FILE = ", config_file)
+        config_data = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+        self.configure_common_settings(config_data)
 
-    def configure_render_settings(self):
+    def _configure_settings_attributes(self, settings):
+        for key, value in settings.items():
+            attributes_prefix = key
+            attributes_settings = value
+
+            defaults_attributes = attributes_settings.get("defaults")
+            connections_attributes = attributes_settings.get("connections")
+
+            # ========================================================
+            # DEFAULTS ATTRIBUTES
+            # ========================================================
+            for attr_name, attr_value in defaults_attributes.items():
+                full_attr_name = "{}.{}".format(attributes_prefix, attr_name)
+                
+                try:
+                    if type(attr_value) == str:
+                        # we need to pass the type arg because the
+                        # attribute value type is a string
+                        cmds.setAttr(full_attr_name, attr_value, type="string")
+                        continue
+
+                    cmds.setAttr(full_attr_name, attr_value)
+                except Exception as e:
+                    self._defcon_app.log_error(e)
+
+            # ========================================================
+            # CONNECTIONS ATTRIBUTES
+            # ========================================================
+            for attr_name, attr_value in connections_attributes.items():
+                full_attr_name = "{}.{}".format(attributes_prefix, attr_name)
+                cmds.connectAttr(attr_value, full_attr_name, f=True)
+
+
+    def configure_render_settings(self, config_data):
         pass
 
-    def configure_arnold_settings(self):
+    def configure_common_settings(self, config_data):
+        common_settings = config_data.get(self._COMMOM_SETTINGS_NAME)
+        if not common_settings:
+            self._log_warning_no_settings_found(
+                self._COMMOM_SETTINGS_NAME,
+                RENDER_SETTINGS_CONFIG_FILE
+            )
+            return
+        
+        self._configure_settings_attributes(common_settings)
+        
+
+
+        
+
+    def configure_arnold_settings(self, config_data):
         pass
 
-    def configure_redshift_settings(self):
+    def configure_redshift_settings(self, config_data):
         pass
 
-    def configure_vray_settings(self):
+    def configure_vray_settings(self, config_data):
         pass
 
 
