@@ -52,12 +52,17 @@ class MayaDefConManager(DefConManager):
     # keys defined in the render_settings.yaml file
     _COMMOM_SETTINGS_NAME = "common"
     _ARNOLD_SETTINGS_NAME = "arnold"
+    _REDSHIFT_SETTINGS_NAME = "redshift"
 
     def __init__(self, defcon_app):
         super(MayaDefConManager, self).__init__(defcon_app)
+        self._loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True )
 
-        config_data = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
-        self.configure_arnold_settings(config_data)
+        render_settings_config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+        self.configure_all_render_settings(render_settings_config)
+
+
+
 
     def _configure_settings_attributes(self, settings):
         for key, value in settings.items():
@@ -127,37 +132,64 @@ class MayaDefConManager(DefConManager):
                     )
 
 
-    def configure_common_settings(self, config_data):
-        common_settings = config_data.get(self._COMMOM_SETTINGS_NAME)
-        if not common_settings:
+    def _configure_settings(self, settings_name, config):
+        settings = config.get(settings_name)
+        if not settings:
             self._log_warning_no_settings_found(
-                self._COMMOM_SETTINGS_NAME,
+                settings_name,
                 RENDER_SETTINGS_CONFIG_FILE
             )
             return
         
-        self._configure_settings_attributes(common_settings)
-        
-    def configure_arnold_settings(self, config_data):
-        arnold_settings = config_data.get(self._ARNOLD_SETTINGS_NAME)
-        if not arnold_settings:
-            self._log_warning_no_settings_found(
-                self._ARNOLD_SETTINGS_NAME,
-                RENDER_SETTINGS_CONFIG_FILE
+        self._configure_settings_attributes(settings)
+
+    def configure_common_settings(self, config):
+        self._configure_settings(self._COMMOM_SETTINGS_NAME, config)
+
+
+    def configure_redshift_settings(self, config):
+        redshift_plugin = "redshift4maya"
+        if redshift_plugin not in self._loaded_plugins:
+            self._defcon_app.log_warning(
+                "Redshift plugin ({}) not loaded. "
+                "Defcon for Redshift will be skipped."
+                .format(redshift_plugin)
             )
             return
         
-        self._configure_settings_attributes(arnold_settings)
+        self._configure_settings(self._REDSHIFT_SETTINGS_NAME, config)
 
 
-    def configure_redshift_settings(self, config_data):
+    def configure_arnold_settings(self, config):
+        arnold_plugin = "mtoa"
+        if arnold_plugin not in self._loaded_plugins:
+            self._defcon_app.log_warning(
+                "Arnold ({}) plugin not loaded. "
+                "Defcon for Arnold will be skipped."
+                .format(arnold_plugin)
+
+            )
+            return
+        
+        self._configure_settings(self._ARNOLD_SETTINGS_NAME, config)
+
+
+    def configure_vray_settings(self, config):
+        # TODO: Implement vray settings
         pass
 
-    def configure_vray_settings(self, config_data):
-        pass
 
-    def configure_render_settings(self, config_data):
-        pass
+    def configure_all_render_settings(self, config):
+
+        # Common settings
+        self.configure_common_settings(config)
+
+        # Arnold settings
+        self.configure_arnold_settings(config)
+
+        # Redshift settings
+        self.configure_redshift_settings(config)
+
 
 
 def create_defcon_manager(defcon_app):
