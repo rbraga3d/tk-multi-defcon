@@ -11,12 +11,14 @@ from .constants import (
     REDSHIFT_PLUGIN
 )
 from .file_manager import DefconFileManager
+from .utils import resolve_image_file_prefix
 
 
 class DefConManager:
     def __init__(self, defcon_app):
         self._defcon_app = defcon_app
         self._engine = self._defcon_app.engine
+        self._context = self._defcon_app.engine.context
         self._file_manager = DefconFileManager(self._defcon_app)
 
 
@@ -82,6 +84,12 @@ class MayaDefConManager(DefConManager):
                 full_attr_name = "{}.{}".format(attributes_prefix, attr_name)
                 
                 try:
+
+                    if attr_name == "imageFilePrefix":
+                        # resolve the tokens for imageFilePrefix
+                        attr_value = resolve_image_file_prefix(self._engine, attr_value)
+
+
                     if type(attr_value) == str:
                         # we need to pass the type arg because the
                         # attribute value type is a string
