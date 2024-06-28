@@ -7,6 +7,8 @@ from tank_vendor import yaml
 
 from .constants import (
     RENDER_SETTINGS_CONFIG_FILE,
+    ARNOLD_PLUGIN,
+    REDSHIFT_PLUGIN
 )
 from .file_manager import DefconFileManager
 
@@ -148,12 +150,11 @@ class MayaDefConManager(DefConManager):
 
 
     def configure_redshift_settings(self, config):
-        redshift_plugin = "redshift4maya"
-        if redshift_plugin not in self._loaded_plugins:
+        if REDSHIFT_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
                 "Redshift plugin ({}) not loaded. "
                 "Defcon for Redshift will be skipped."
-                .format(redshift_plugin)
+                .format(REDSHIFT_PLUGIN)
             )
             return
         
@@ -161,12 +162,11 @@ class MayaDefConManager(DefConManager):
 
 
     def configure_arnold_settings(self, config):
-        arnold_plugin = "mtoa"
-        if arnold_plugin not in self._loaded_plugins:
+        if ARNOLD_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
                 "Arnold ({}) plugin not loaded. "
                 "Defcon for Arnold will be skipped."
-                .format(arnold_plugin)
+                .format(ARNOLD_PLUGIN)
 
             )
             return
