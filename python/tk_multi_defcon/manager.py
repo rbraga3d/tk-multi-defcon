@@ -62,10 +62,42 @@ class MayaDefConManager(DefConManager):
         super(MayaDefConManager, self).__init__(defcon_app)
         self._loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True )
 
-        render_settings_config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
-        self.configure_all_render_settings(render_settings_config)
+
+        self.configure_common_settings()
 
 
+
+    def configure_image_file_prefix(self):
+        """
+        Configure the image file prefix in the common render globals
+        tab.
+        """
+        config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+        common_settings = config.get(self._COMMOM_SETTINGS_NAME)
+        default_render_globals = common_settings.get("defaultRenderGlobals")
+        image_file_prefix_value = default_render_globals["defaults"]["imageFilePrefix"]
+
+        full_attr_name = "defaultRenderGlobals.imageFilePrefix"
+
+        resolved_prefix = resolve_image_file_prefix(
+            self._engine,
+            image_file_prefix_value
+        )
+
+        try:
+
+            cmds.setAttr(
+                full_attr_name,
+                resolved_prefix,
+                type="string"
+            )
+
+        except Exception as e:
+            self._defcon_app.log_error(
+                "Could not set {} attribute. "
+                "Error: {}"
+                .format(full_attr_name, e)
+            )
 
 
     def _configure_settings_attributes(self, settings):
@@ -80,16 +112,11 @@ class MayaDefConManager(DefConManager):
             # ========================================================
             # DEFAULTS ATTRIBUTES
             # ========================================================
+            
             for attr_name, attr_value in defaults_attributes.items():
                 full_attr_name = "{}.{}".format(attributes_prefix, attr_name)
-                
+
                 try:
-
-                    if attr_name == "imageFilePrefix":
-                        # resolve the tokens for imageFilePrefix
-                        attr_value = resolve_image_file_prefix(self._engine, attr_value)
-
-
                     if type(attr_value) == str:
                         # we need to pass the type arg because the
                         # attribute value type is a string
@@ -144,6 +171,7 @@ class MayaDefConManager(DefConManager):
 
     def _configure_settings(self, settings_name, config):
         settings = config.get(settings_name)
+
         if not settings:
             self._log_warning_no_settings_found(
                 settings_name,
@@ -151,13 +179,29 @@ class MayaDefConManager(DefConManager):
             )
             return
         
+
+        # Remove the imageFilePrefix attribute from the common settings
+        # configuration because we will configure it separetely
+        if settings_name == self._COMMOM_SETTINGS_NAME:
+            settings["defaultRenderGlobals"]["defaults"].pop(
+                "imageFilePrefix"
+            )
+
         self._configure_settings_attributes(settings)
 
-    def configure_common_settings(self, config):
+
+    def configure_common_settings(self, config=None):
+        if config == None:
+            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+
         self._configure_settings(self._COMMOM_SETTINGS_NAME, config)
+        self.configure_image_file_prefix()
 
 
-    def configure_redshift_settings(self, config):
+    def configure_redshift_settings(self, config=None):
+        if config == None:
+            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+
         if REDSHIFT_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
                 "Redshift plugin ({}) not loaded. "
@@ -169,7 +213,10 @@ class MayaDefConManager(DefConManager):
         self._configure_settings(self._REDSHIFT_SETTINGS_NAME, config)
 
 
-    def configure_arnold_settings(self, config):
+    def configure_arnold_settings(self, config=None):
+        if config == None:
+            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+
         if ARNOLD_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
                 "Arnold ({}) plugin not loaded. "
@@ -182,12 +229,16 @@ class MayaDefConManager(DefConManager):
         self._configure_settings(self._ARNOLD_SETTINGS_NAME, config)
 
 
-    def configure_vray_settings(self, config):
+    def configure_vray_settings(self, config=None):
+        if config == None:
+            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+
         # TODO: Implement vray settings
-        pass
 
 
-    def configure_all_render_settings(self, config):
+    def configure_all_render_settings(self, config=None):
+        if config == None:
+            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         # Common settings
         self.configure_common_settings(config)
