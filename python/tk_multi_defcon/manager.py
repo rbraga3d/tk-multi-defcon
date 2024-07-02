@@ -63,10 +63,6 @@ class MayaDefConManager(DefConManager):
         self._loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True )
 
 
-        self.configure_common_settings()
-
-
-
     def configure_image_file_prefix(self):
         """
         Configure the image file prefix in the common render globals
@@ -195,7 +191,7 @@ class MayaDefConManager(DefConManager):
             config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         self._configure_settings(self._COMMOM_SETTINGS_NAME, config)
-        self.configure_image_file_prefix()
+        
 
 
     def configure_redshift_settings(self, config=None):

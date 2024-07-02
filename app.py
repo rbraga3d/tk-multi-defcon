@@ -14,7 +14,7 @@ class DefConApp(Application):
         """
 
         defcon_module = self.import_module("tk_multi_defcon")
-        self._manager = defcon_module.manager.create_defcon_manager(self)
+        self.manager = defcon_module.manager.create_defcon_manager(self)
 
 
         # maya's menu callback
