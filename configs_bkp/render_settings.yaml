@@ -1,0 +1,62 @@
+# SG Tokens:
+#   {Project} = SG Project name
+#   {Asset} = SG Asset name
+#   {Step} = SG Step name
+#   {Sequence} = SG Sequence name
+#   {Shot} = SG Shot name
+#   {version} = Work file version number (ex: 001, 002, 003, etc)
+#   {sg_asset_type} = SG Asset type (ex: Character, Environment, Prop, etc...)
+
+
+# ===============================================================================
+# RENDER GLOBALS 
+# ===============================================================================
+common:
+  defaultRenderGlobals:
+    defaults:
+      imageFilePrefix: "ANIMATION/{Project}_{Shot}/v{version}/<RenderLayer>/<RenderLayer>_{Project}_{Shot}"
+      animation: 1
+      extensionPadding: 4
+    others:
+      setMayaSoftwareFrameExt: 3
+  defaultResolution:
+    defaults:
+      aspectLock: 1
+
+
+# ===============================================================================
+# ARNOLD
+# ===============================================================================
+arnold:
+  defaultArnoldRenderOptions:
+    defaults:
+      AASamples: 5
+      GIDiffuseSamples: 2
+      GISpecularSamples: 2
+      GITransmissionSamples: 2
+      GISssSamples: 2
+      GIVolumeSamples: 2
+      GITransmissionDepth: 6
+      autotx: 0
+  defaultArnoldDriver:
+    defaults:
+      mergeAOVs: 1
+
+
+# ===============================================================================
+# REDSHIFT
+# ===============================================================================
+redshift:
+  redshiftOptions:
+    defaults:
+      motionBlurEnable: 1
+      imageFormat: 1
+      exrBits: 32
+      exrCompression: 8
+      exrForceMultilayer: 1
+      noSaveImage: 1
+      progressiveRenderingNumPasses: 512
+      applyTonemappingToHdrFiles: 0
+      applyPostEffectsToHdrFiles: 0
+
+  
