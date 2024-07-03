@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2013 Shotgun Software Inc.
+# Copyright (c) 2015 Shotgun Software Inc.
 #
 # CONFIDENTIAL AND PROPRIETARY
 #
@@ -11,12 +11,11 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 # The path to output all built .py files to:
-UI_PYTHON_PATH=../python/app/ui
-# The path to where the PySide binaries are installed
-PYTHON_BASE="/Applications/Shotgun.app/Contents/Resources/Python"
+UI_PYTHON_PATH=../python/tk_multi_defcon/ui
+PYTHON_2_BASE="C:/Python27"
+UIC_PATH="${PYTHON_2_BASE}/Scripts"
+RCC_PATH="${PYTHON_2_BASE}/Lib/site-packages/PySide"
 
-# Remove any problematic profiles from pngs.
-for f in *.png; do mogrify $f; done
 
 # Helper functions to build UI files
 function build_qt {
@@ -25,23 +24,23 @@ function build_qt {
     # compile ui to python
     $1 $2 > $UI_PYTHON_PATH/$3.py
 
-    # replace PySide imports with tank.platform.qt and remove line containing Created by date
-    sed -i $UI_PYTHON_PATH/$3.py -e "s/from PySide import/from tank.platform.qt import/g" -e "/# Created:/d"
+    # replace PySide imports with sgtk.platform.qt imports
+    sed -i $UI_PYTHON_PATH/$3.py -e "s/from PySide import/from tank.platform.qt import/g" -e "/# Created:/d" $UI_PYTHON_PATH/$3.py
 }
 
 function build_ui {
-    build_qt "${PYTHON_BASE}/bin/python ${PYTHON_BASE}/bin/pyside-uic --from-imports" "$1.ui" "$1"
+    build_qt "${PYTHON_2_BASE}/python.exe ${UIC_PATH}/pyside-uic.exe --from-imports" "$1.ui" "$1"
 }
 
 function build_res {
-    build_qt "${PYTHON_BASE}/bin/pyside-rcc -py3" "$1.qrc" "$1_rc"
+    build_qt "${RCC_PATH}/pyside-rcc.exe" "$1.qrc" "$1_rc"
 }
 
 
 # build UI's:
 echo "building user interfaces..."
 build_ui dialog
-# add any additional .ui files you want converted here!
+
 
 # build resources
 echo "building resources..."
