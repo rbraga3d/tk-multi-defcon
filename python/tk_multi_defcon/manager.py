@@ -22,7 +22,7 @@ class DefConManager:
         self._file_manager = DefconFileManager(self._defcon_app)
 
 
-    def _get_config(self, config_name):
+    def get_config(self, config_name):
         """
         Returns the config for the given config name
         return type: dict
@@ -43,6 +43,10 @@ class DefConManager:
 
         return {}
     
+    def get_stringed_config(self, config_name):
+        config = self.get_config(config_name)
+        return yaml.dump(config, default_flow_style=False, indent=8)
+
     def _log_warning_no_settings_found(self, settings_name, config_name):
         self._defcon_app.log_warning(
             "No {} settings found in the {} file. "
@@ -62,38 +66,6 @@ class MayaDefConManager(DefConManager):
         super(MayaDefConManager, self).__init__(defcon_app)
         self._loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True )
 
-
-    def configure_image_file_prefix(self):
-        """
-        Configure the image file prefix in the common render globals
-        tab.
-        """
-        config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
-        common_settings = config.get(self._COMMOM_SETTINGS_NAME)
-        default_render_globals = common_settings.get("defaultRenderGlobals")
-        image_file_prefix_value = default_render_globals["defaults"]["imageFilePrefix"]
-
-        full_attr_name = "defaultRenderGlobals.imageFilePrefix"
-
-        resolved_prefix = resolve_image_file_prefix(
-            self._engine,
-            image_file_prefix_value
-        )
-
-        try:
-
-            cmds.setAttr(
-                full_attr_name,
-                resolved_prefix,
-                type="string"
-            )
-
-        except Exception as e:
-            self._defcon_app.log_error(
-                "Could not set {} attribute. "
-                "Error: {}"
-                .format(full_attr_name, e)
-            )
 
 
     def _configure_settings_attributes(self, settings):
@@ -186,17 +158,50 @@ class MayaDefConManager(DefConManager):
         self._configure_settings_attributes(settings)
 
 
+    def configure_image_file_prefix(self):
+        """
+        Configure the image file prefix in the common render globals
+        tab.
+        """
+        config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
+        common_settings = config.get(self._COMMOM_SETTINGS_NAME)
+        default_render_globals = common_settings.get("defaultRenderGlobals")
+        image_file_prefix_value = default_render_globals["defaults"]["imageFilePrefix"]
+
+        full_attr_name = "defaultRenderGlobals.imageFilePrefix"
+
+        resolved_prefix = resolve_image_file_prefix(
+            self._engine,
+            image_file_prefix_value
+        )
+
+        try:
+
+            cmds.setAttr(
+                full_attr_name,
+                resolved_prefix,
+                type="string"
+            )
+
+        except Exception as e:
+            self._defcon_app.log_error(
+                "Could not set {} attribute. "
+                "Error: {}"
+                .format(full_attr_name, e)
+            )
+
+
     def configure_common_settings(self, config=None):
         if config == None:
-            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         self._configure_settings(self._COMMOM_SETTINGS_NAME, config)
-        
+        self.configure_image_file_prefix()
 
 
     def configure_redshift_settings(self, config=None):
         if config == None:
-            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         if REDSHIFT_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
@@ -211,7 +216,7 @@ class MayaDefConManager(DefConManager):
 
     def configure_arnold_settings(self, config=None):
         if config == None:
-            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         if ARNOLD_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
@@ -227,14 +232,14 @@ class MayaDefConManager(DefConManager):
 
     def configure_vray_settings(self, config=None):
         if config == None:
-            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         # TODO: Implement vray settings
 
 
     def configure_all_render_settings(self, config=None):
         if config == None:
-            config = self._get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         # Common settings
         self.configure_common_settings(config)

@@ -18,6 +18,12 @@ import threading
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.dialog import Ui_Dialog
 
+from .constants import (
+    RENDER_SETTINGS_CONFIG_FILE
+)
+
+
+
 # standard toolkit logger
 logger = sgtk.platform.get_logger(__name__)
 
@@ -58,9 +64,23 @@ class AppDialog(QtGui.QWidget):
         # logging happens via a standard toolkit logger
         logger.info("Launching Defcon Application...")
 
+        # ============================================================================
+        # TABS
+        # ============================================================================
+        self.ui.main_tab_widget.setTabText(0, "Render Settings")
+        self.ui.main_tab_widget.setTabText(1, "Configs")
+
+
 
         # ============================================================================
-        # BUTTON CONNECTIONS
+        # CONFIGS PLAINT TEXT
+        # ============================================================================
+        self.ui.configs_plaint_text.setPlainText(
+            self._app.manager.get_stringed_config(RENDER_SETTINGS_CONFIG_FILE)
+        )
+
+        # ============================================================================
+        # BUTTONS CONNECTIONS
         # ============================================================================
         self.ui.config_image_file_prefix_button.clicked.connect(
             self._on_image_file_prefix_button_clicked

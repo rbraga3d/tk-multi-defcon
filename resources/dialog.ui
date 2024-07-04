@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>478</width>
-    <height>661</height>
+    <height>664</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,11 +15,11 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="main_tab_widget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
-     <widget class="QWidget" name="config_tab">
+     <widget class="QWidget" name="render_settings_tab">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -82,7 +82,7 @@
           </size>
          </property>
          <property name="title">
-          <string>Render Globals</string>
+          <string>Common</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
@@ -94,7 +94,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Config Project Render Settings</string>
+             <string>Config Render Settings</string>
             </property>
            </widget>
           </item>
@@ -107,7 +107,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Config Project Image File Prefix</string>
+             <string>Config Image File Prefix</string>
             </property>
            </widget>
           </item>
@@ -132,7 +132,7 @@
           <enum>Qt::LeftToRight</enum>
          </property>
          <property name="title">
-          <string>Renderers Settings</string>
+          <string>Renderers</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
@@ -144,7 +144,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Config Project Arnold Settings</string>
+             <string>Config Arnold Settings</string>
             </property>
            </widget>
           </item>
@@ -157,7 +157,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Config Project Redshift Settings</string>
+             <string>Config Redshift Settings</string>
             </property>
            </widget>
           </item>
@@ -166,10 +166,47 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="view_settings_tab">
+     <widget class="QWidget" name="configs_tab">
       <attribute name="title">
        <string>Page</string>
       </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QPlainTextEdit" name="configs_plaint_text">
+           <property name="font">
+            <font>
+             <family>Segoe UI</family>
+             <pointsize>10</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+             <kerning>true</kerning>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(222, 222, 222);</string>
+           </property>
+           <property name="plainText">
+            <string>Config:
+    Config1: 1
+    Config2: 2</string>
+           </property>
+           <property name="textInteractionFlags">
+            <set>Qt::NoTextInteraction</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="config_file_label">
+           <property name="text">
+            <string>Config file: ./PATH_TO_FILE/render_settings.yml</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
