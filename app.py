@@ -21,7 +21,7 @@ class DefConApp(Application):
         menu_callback = lambda: defcon_module.dialog.show_dialog(self)
 
         # now register the command with the engine
-        self.engine.register_command("Defcon Settings...", menu_callback)
+        self.engine.register_command("DefCon...", menu_callback)
 
 
 

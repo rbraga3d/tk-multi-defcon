@@ -1,4 +1,4 @@
-RENDER_SETTINGS_CONFIG_FILE = "render_settings.yaml"
+RENDER_SETTINGS_CONFIG_FILE = "render_settings.yml"
 
 ENGINES_DIR_NAME = {
     "tk-maya": "maya",
