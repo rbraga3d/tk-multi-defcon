@@ -43,9 +43,18 @@ class DefConManager:
 
         return {}
     
+    def get_config_file_path(self, config_name):
+        return self._file_manager.get_config_file_path(config_name)
+
     def get_stringed_config(self, config_name):
         config = self.get_config(config_name)
-        return yaml.dump(config, default_flow_style=False, indent=8)
+
+        return yaml.dump(
+            config,
+            default_flow_style=False,
+            sort_keys=False,
+            indent=6
+        )
 
     def _log_warning_no_settings_found(self, settings_name, config_name):
         self._defcon_app.log_warning(
@@ -196,7 +205,6 @@ class MayaDefConManager(DefConManager):
             config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
 
         self._configure_settings(self._COMMOM_SETTINGS_NAME, config)
-        self.configure_image_file_prefix()
 
 
     def configure_redshift_settings(self, config=None):

@@ -8,11 +8,12 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import sgtk
 import os
 import sys
 import threading
 
+import maya.cmds as cmds
+import sgtk
 # by importing QT from sgtk rather than directly, we ensure that
 # the code will be compatible with both PySide and PyQt.
 from sgtk.platform.qt import QtCore, QtGui
@@ -45,6 +46,8 @@ class AppDialog(QtGui.QWidget):
     """
     Main application dialog window
     """
+    _RENDER_SETTINGS_TAB_WIDTH = 450
+    _CONFIGS_TAB_WIDTH = 780
 
     def __init__(self):
         """
@@ -70,17 +73,27 @@ class AppDialog(QtGui.QWidget):
         self.ui.main_tab_widget.setTabText(0, "Render Settings")
         self.ui.main_tab_widget.setTabText(1, "Configs")
 
-
+        self.ui.main_tab_widget.currentChanged.connect(self._on_tab_changed) 
 
         # ============================================================================
-        # CONFIGS PLAINT TEXT
+        # LABELS
+        # ============================================================================
+        self.ui.config_file_label.setText(
+            "Config file: {}".format(
+                self._app.manager.get_config_file_path(RENDER_SETTINGS_CONFIG_FILE)
+            )
+        )
+        
+
+        # ============================================================================
+        # PLAINT TEXT
         # ============================================================================
         self.ui.configs_plaint_text.setPlainText(
             self._app.manager.get_stringed_config(RENDER_SETTINGS_CONFIG_FILE)
         )
 
         # ============================================================================
-        # BUTTONS CONNECTIONS
+        # BUTTONS
         # ============================================================================
         self.ui.config_image_file_prefix_button.clicked.connect(
             self._on_image_file_prefix_button_clicked
@@ -98,15 +111,71 @@ class AppDialog(QtGui.QWidget):
             self._on_redshift_button_clicked
         )
 
+        if cmds.file(query=True, sn=True):
+            # we will enable this button only if the scene has been saved
+            # so we can get the file name to use for the image file prefix
+            # confi
+            self.ui.config_image_file_prefix_button.setEnabled(True)
+        else:
+            # set a tool tip for the disabled button
+            self.ui.config_image_file_prefix_button.setToolTip(
+                "Please save your scene to enable this button."
+            )
+
+
+    def _on_tab_changed(self, index):
+        window = self.window()
+        window_height = window.height()
+        if index == 0:
+            window.resize(self._RENDER_SETTINGS_TAB_WIDTH, window_height)
+        elif index == 1:
+            window.resize(self._CONFIGS_TAB_WIDTH, window_height)
+        
 
     def _on_image_file_prefix_button_clicked(self):
+        if not self._can_override("Image File Prefix"):
+            return
+        
         self._app.manager.configure_image_file_prefix()
 
     def _on_render_settings_button_clicked(self):
+        if not self._can_override("Render Common"):
+            return
+        
         self._app.manager.configure_common_settings()
 
     def _on_arnold_button_clicked(self):
+        if not self._can_override("Arnold"):
+            return
+        
         self._app.manager.configure_arnold_settings()
 
     def _on_redshift_button_clicked(self):
+        if not self._can_override("Redshift"):
+            return
+        
         self._app.manager.configure_redshift_settings()
+
+
+    def _show_override_warning_message(self, settings_to_override):
+        msg = QtGui.QMessageBox()
+        msg.setIcon(QtGui.QMessageBox.Warning)
+        msg.setText("ATTENTION!")
+        msg.findChild(QtGui.QLabel, "qt_msgbox_label").setFixedWidth(250)
+        msg.setInformativeText("This will override current {} settings!".format(
+            settings_to_override
+            )
+        )
+
+        msg.setWindowTitle("Override Settings?")
+        msg.setStandardButtons(QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel)
+        
+        return msg.exec()
+    
+
+    def _can_override(self, settings_to_override):
+        button_clicked = self._show_override_warning_message(
+            settings_to_override
+        )
+
+        return True if button_clicked == QtGui.QMessageBox.Ok else False

@@ -18,3 +18,7 @@ QListView, QTableView, QScrollArea {
 }
 
 */
+
+QPlainTextEdit {
+    color: rgb(150, 150, 150);
+}
