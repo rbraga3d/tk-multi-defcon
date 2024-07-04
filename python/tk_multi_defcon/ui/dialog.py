@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(474, 664)
+        Dialog.resize(413, 664)
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.main_tab_widget = QtGui.QTabWidget(Dialog)
@@ -127,7 +127,7 @@ class Ui_Dialog(object):
         self.configs_plaint_text.setObjectName("configs_plaint_text")
         self.verticalLayout_2.addWidget(self.configs_plaint_text)
         self.config_file_label = QtGui.QLabel(self.configs_tab)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.config_file_label.sizePolicy().hasHeightForWidth())
