@@ -51,18 +51,42 @@ class AppDialog(QtGui.QWidget):
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
 
-        # most of the useful accessors are available through the Application class instance
-        # it is often handy to keep a reference to this. You can get it via the following method:
+
         self._app = sgtk.platform.current_bundle()
         
 
         # logging happens via a standard toolkit logger
         logger.info("Launching Defcon Application...")
 
-        # via the self._app handle we can for example access:
-        # - The engine, via self._app.engine
-        # - A Shotgun API instance, via self._app.shotgun
-        # - An Sgtk API instance, via self._app.sgtk
 
-        # lastly, set up our very basic UI
-        self.ui.context.setText("Current Context: %s" % self._app.context)
+        # ============================================================================
+        # BUTTON CONNECTIONS
+        # ============================================================================
+        self.ui.config_image_file_prefix_button.clicked.connect(
+            self._on_image_file_prefix_button_clicked
+        )
+
+        self.ui.config_render_settings_button.clicked.connect(
+            self._on_render_settings_button_clicked
+        )
+
+        self.ui.config_arnold_button.clicked.connect(
+            self._on_arnold_button_clicked
+        )
+
+        self.ui.config_redshift_button.clicked.connect(
+            self._on_redshift_button_clicked
+        )
+
+
+    def _on_image_file_prefix_button_clicked(self):
+        self._app.manager.configure_image_file_prefix()
+
+    def _on_render_settings_button_clicked(self):
+        self._app.manager.configure_common_settings()
+
+    def _on_arnold_button_clicked(self):
+        self._app.manager.configure_arnold_settings()
+
+    def _on_redshift_button_clicked(self):
+        self._app.manager.configure_redshift_settings()
