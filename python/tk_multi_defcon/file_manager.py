@@ -39,15 +39,5 @@ class DefconFileManager:
 
         return os.path.normpath(engine_config_file_path)
 
-    # def get_config_file_path(self, config_name):
-    #     """
-    #     Return the path to the config file
-    #     """
-    #     engine_configs_path = self.get_current_engine_configs_path()
-    #     config_file_path = os.path.join(
-    #         engine_configs_path,
-    #         config_name
-    #     )
 
-    #     return os.path.normpath(config_file_path)
 

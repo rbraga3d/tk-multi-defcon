@@ -6,7 +6,6 @@ import maya.mel as mel
 from tank_vendor import yaml
 
 from .constants import (
-    RENDER_SETTINGS_CONFIG_FILE,
     ARNOLD_PLUGIN,
     REDSHIFT_PLUGIN
 )
@@ -22,32 +21,32 @@ class DefConManager:
         self._file_manager = DefconFileManager(self._defcon_app)
 
 
-    def get_config(self, config_name):
+    def get_cur_engine_default_config(self):
         """
-        Returns the config for the given config name
+        Returns the current engine defaults config
         return type: dict
         """
-        config_path = self._file_manager.get_config_file_path(config_name)
+        default_config_file_path = self._file_manager.get_cur_engine_default_config_file_path()
 
         try:
-            with open(config_path, 'r') as config_file:
-                return yaml.safe_load(config_file)
+            with open(default_config_file_path, 'r') as default_config_file:
+                return yaml.safe_load(default_config_file)
             
         except FileNotFoundError:
             self._defcon_app.log_error(
-                "Config file not found: {}. "
-                "Defcon for {} will be skipped"
-                .format(config_path, config_name.split(".")[0].upper())
+                "Default config file not found: {}. "
+                "Defcon will be skiped."
+                .format(default_config_file_path)
                 
             )
 
         return {}
     
-    def get_config_file_path(self, config_name):
-        return self._file_manager.get_config_file_path(config_name)
+    def get_cur_engine_default_config_file_path(self):
+        return self._file_manager.get_cur_engine_default_config_file_path()
 
-    def get_stringed_config(self, config_name):
-        config = self.get_config(config_name)
+    def get_stringed_config(self):
+        config = self.get_cur_engine_default_config()
 
         return yaml.dump(
             config,
@@ -172,7 +171,7 @@ class MayaDefConManager(DefConManager):
         Configure the image file prefix in the common render globals
         tab.
         """
-        config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
+        config = self.get_cur_engine_default_config()
         common_settings = config.get(self._COMMOM_SETTINGS_NAME)
         default_render_globals = common_settings.get("defaultRenderGlobals")
         image_file_prefix_value = default_render_globals["defaults"]["imageFilePrefix"]
@@ -202,14 +201,14 @@ class MayaDefConManager(DefConManager):
 
     def configure_common_settings(self, config=None):
         if config == None:
-            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_cur_engine_default_config()
 
         self._configure_settings(self._COMMOM_SETTINGS_NAME, config)
 
 
     def configure_redshift_settings(self, config=None):
         if config == None:
-            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_cur_engine_default_config()
 
         if REDSHIFT_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
@@ -224,7 +223,7 @@ class MayaDefConManager(DefConManager):
 
     def configure_arnold_settings(self, config=None):
         if config == None:
-            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_cur_engine_default_config()
 
         if ARNOLD_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
@@ -240,14 +239,14 @@ class MayaDefConManager(DefConManager):
 
     def configure_vray_settings(self, config=None):
         if config == None:
-            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_cur_engine_default_config()
 
         # TODO: Implement vray settings
 
 
     def configure_all_render_settings(self, config=None):
         if config == None:
-            config = self.get_config(RENDER_SETTINGS_CONFIG_FILE)
+            config = self.get_cur_engine_default_config()
 
         # Common settings
         self.configure_common_settings(config)

@@ -20,7 +20,7 @@ configuration:
                            all engine defcon configurations files (maya_defaults, nuke_defaults, etc..)
 
        maya_default_config_file:
-              type: string
+              type: str
               default_value: "maya_defaults.yml"
               description: Name of the Maya's file with default configurations
 

@@ -8,9 +8,7 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import os
-import sys
-import threading
+
 
 import maya.cmds as cmds
 import sgtk
@@ -18,11 +16,6 @@ import sgtk
 # the code will be compatible with both PySide and PyQt.
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.dialog import Ui_Dialog
-
-from .constants import (
-    RENDER_SETTINGS_CONFIG_FILE
-)
-
 
 
 # standard toolkit logger
@@ -80,7 +73,7 @@ class AppDialog(QtGui.QWidget):
         # ============================================================================
         self.ui.config_file_label.setText(
             "Config file: {}".format(
-                self._app.manager.get_config_file_path(RENDER_SETTINGS_CONFIG_FILE)
+                self._app.manager.get_cur_engine_default_config_file_path()
             )
         )
         
@@ -89,7 +82,7 @@ class AppDialog(QtGui.QWidget):
         # PLAINT TEXT
         # ============================================================================
         self.ui.configs_plaint_text.setPlainText(
-            self._app.manager.get_stringed_config(RENDER_SETTINGS_CONFIG_FILE)
+            self._app.manager.get_stringed_config()
         )
 
         # ============================================================================
