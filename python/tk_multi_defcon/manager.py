@@ -267,6 +267,6 @@ def create_defcon_manager(defcon_app):
     engine_name = defcon_app.engine.name
 
     # Maya defcon manager
-    if engine_name == "tk-maya":
+    if "maya" in engine_name:
         return MayaDefConManager(defcon_app)
 
