@@ -1,4 +1,4 @@
-from pprint import pprint
+import requests
 
 import maya.cmds as cmds
 import maya.mel as mel
@@ -6,6 +6,7 @@ import maya.mel as mel
 from tank_vendor import yaml
 
 from .constants import (
+    ENTITY_DEFAULTCONFIG,
     ARNOLD_PLUGIN,
     REDSHIFT_PLUGIN
 )
@@ -18,8 +19,13 @@ class DefConManager:
         self._defcon_app = defcon_app
         self._engine = self._defcon_app.engine
         self._context = self._defcon_app.engine.context
+        self._shotgun = self._defcon_app.shotgun
         self._file_manager = DefconFileManager(self._defcon_app)
 
+
+    def get_cur_engine_default_config_file_path(self):
+        return self._file_manager.get_cur_engine_default_config_file_path()
+    
 
     def get_cur_engine_default_config(self):
         """
@@ -40,10 +46,108 @@ class DefConManager:
                 
             )
 
-        return {}
+        return
+
+
+    def get_cur_engine_default_config_from_shotgun(self, sg_config_field):
+        """
+        Returns the data from the default config file uplodaded 
+        to shotgun DefaultConfig entity, we don't need to download the
+        config file and can use the configuration directly.
+
+        sg_config_field: string : Engine configuration field name
+        examples: 
+            "sg_maya_config_file"
+            "sg_nuke_config_file"
+        
+        return type: dict or None
+
+        """
     
-    def get_cur_engine_default_config_file_path(self):
-        return self._file_manager.get_cur_engine_default_config_file_path()
+        project_id = self._context.project['id']
+
+        filters = [
+            ['project', 'is', {'type': 'Project', 'id': project_id}]
+        ]
+
+        fields = [
+            "project",
+            sg_config_field
+        ]
+
+        
+        # let's try to retrieve Default Config entity data
+        try:
+            data = self._shotgun.find_one(ENTITY_DEFAULTCONFIG, filters, fields)
+
+        except Exception as e:
+            self._defcon_app.log_error(
+            "Default config not loaded from shotgun site"
+            "Defcon will be skiped. Error: {}"
+            .format(e)
+            
+            )
+
+            return
+        
+        # check data
+        if data == None:
+            self._defcon_app.log_error(
+                "Couldn't find Default Config entity data. "
+                "Please check if there's any Default Config associated"
+                "with the current project in the shotgun site."
+                "Defcon will be skipped."
+            )
+
+            return
+
+
+        # check if there's an uplodaded config file
+        if not data[sg_config_field]:
+            self._defcon_app.log_error(
+                "No configuration file uploaded to the current engine."
+                "Please upload a valid configuration file and try again."
+                "Defcon will be skipped."
+            )
+
+            return
+
+        # check if uplodaded file is a yaml file
+        file_name = data[sg_config_field]['name']
+        file_extension = file_name.split('.')[-1]
+        if file_extension != "yml" or file_extension != "yaml":
+            self._defcon_app.log_error(
+                "Configuration file is not a YAML file. "
+                "Please upload a YAML file and try again."
+                "Defcon will be skipped."
+            )
+
+            return
+
+        
+        # we will use requests to get the default config file data
+        # directly from the shotgun site
+        file_url = data[sg_config_field]['url']
+        response = requests.get(file_url, allow_redirects=True)
+
+        # check request response
+        if response.status_code != 200:
+            self._defcon_app.log_warning(
+                "Default config not loaded from shotgun site"
+                "Defcon will be skiped. Status code: {}"
+                .format(response.status_code)
+            )
+
+            return 
+
+        content = response.content.decode("utf-8")
+        config = yaml.safe_load(content)
+
+        return config
+
+    
+    
+
 
     def get_stringed_config(self):
         config = self.get_cur_engine_default_config()
@@ -150,8 +254,7 @@ class MayaDefConManager(DefConManager):
 
         if not settings:
             self._log_warning_no_settings_found(
-                settings_name,
-                RENDER_SETTINGS_CONFIG_FILE
+                settings_name, config
             )
             return
         
