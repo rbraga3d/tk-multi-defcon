@@ -1,4 +1,4 @@
-import requests
+import urllib.request
 
 import maya.cmds as cmds
 import maya.mel as mel
@@ -21,6 +21,10 @@ class DefConManager:
         self._context = self._defcon_app.engine.context
         self._shotgun = self._defcon_app.shotgun
         self._file_manager = DefconFileManager(self._defcon_app)
+
+        print(
+            self.get_cur_engine_default_config_from_shotgun("sg_maya_config_file")
+        )
 
 
     def get_cur_engine_default_config_file_path(self):
@@ -115,7 +119,8 @@ class DefConManager:
         # check if uplodaded file is a yaml file
         file_name = data[sg_config_field]['name']
         file_extension = file_name.split('.')[-1]
-        if file_extension != "yml" or file_extension != "yaml":
+
+        if file_extension not in ["yml", "yaml"]:
             self._defcon_app.log_error(
                 "Configuration file is not a YAML file. "
                 "Please upload a YAML file and try again."
@@ -128,10 +133,10 @@ class DefConManager:
         # we will use requests to get the default config file data
         # directly from the shotgun site
         file_url = data[sg_config_field]['url']
-        response = requests.get(file_url, allow_redirects=True)
+        response = urllib.request.urlopen(file_url)
 
         # check request response
-        if response.status_code != 200:
+        if response.status != 200:
             self._defcon_app.log_warning(
                 "Default config not loaded from shotgun site"
                 "Defcon will be skiped. Status code: {}"
@@ -140,7 +145,7 @@ class DefConManager:
 
             return 
 
-        content = response.content.decode("utf-8")
+        content = response.read().decode("utf-8")
         config = yaml.safe_load(content)
 
         return config
