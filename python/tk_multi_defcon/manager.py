@@ -195,6 +195,11 @@ class MayaDefConManager(DefConManager):
             # ========================================================
             
             for attr_name, attr_value in defaults_attributes.items():
+                if attr_name == "imageFilePrefix":
+                    # Ignore this image file prefix configuration
+                    # because we will configure it separetely
+                    continue
+
                 full_attr_name = "{}.{}".format(attributes_prefix, attr_name)
 
                 try:
@@ -256,14 +261,6 @@ class MayaDefConManager(DefConManager):
         if not settings:
             self._log_warning_no_settings_found(settings_name)
             return
-        
-
-        # Remove the imageFilePrefix attribute from the common settings
-        # configuration because we will configure it separetely
-        if settings_name == self._COMMOM_SETTINGS_NAME:
-            settings["defaultRenderGlobals"]["defaults"].pop(
-                "imageFilePrefix"
-            )
 
         self._configure_settings_attributes(settings)
 

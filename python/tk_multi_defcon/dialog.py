@@ -73,11 +73,7 @@ class AppDialog(QtGui.QWidget):
         # ============================================================================
         # LABELS
         # ============================================================================
-        self.ui.config_file_label.setText(
-            "Config file: {}".format(
-                self._app.manager.get_cur_engine_default_config_file_path()
-            )
-        )
+        self.ui.config_file_label.setText("")
         
 
         # ============================================================================
