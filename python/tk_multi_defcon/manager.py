@@ -347,7 +347,7 @@ class MayaDefConManager(DefConManager):
 
 
 
-def create_defcon_manager(defcon_app):
+def create_manager(defcon_app):
     """
     Create a defcon manager based on the current engine
     """
