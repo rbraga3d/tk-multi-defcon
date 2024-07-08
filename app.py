@@ -14,7 +14,10 @@ class DefConApp(Application):
         """
 
         defcon_module = self.import_module("tk_multi_defcon")
-        self.manager = defcon_module.manager.create_defcon_manager(self)
+        
+        # init without a manager. We will assign one later in the 
+        # Dialog class
+        self.manager = None
 
 
         # maya's menu callback

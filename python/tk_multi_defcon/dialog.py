@@ -16,6 +16,7 @@ import sgtk
 # the code will be compatible with both PySide and PyQt.
 from sgtk.platform.qt import QtCore, QtGui
 from .ui.dialog import Ui_Dialog
+from .manager import create_defcon_manager
 
 
 # standard toolkit logger
@@ -55,6 +56,7 @@ class AppDialog(QtGui.QWidget):
 
 
         self._app = sgtk.platform.current_bundle()
+        self._app.manager = create_defcon_manager(self._app)
         
 
         # logging happens via a standard toolkit logger

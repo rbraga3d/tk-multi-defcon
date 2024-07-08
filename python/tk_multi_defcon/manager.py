@@ -1,5 +1,5 @@
 import urllib.request
-
+from pprint import pprint
 import maya.cmds as cmds
 import maya.mel as mel
 
@@ -15,16 +15,18 @@ from .utils import resolve_image_file_prefix
 
 
 class DefConManager:
+
+    _SG_ENGINE_CONFIG_FILE_FIELDS = {
+        "tk-maya": "sg_maya_config_file"
+    }
+
     def __init__(self, defcon_app):
         self._defcon_app = defcon_app
         self._engine = self._defcon_app.engine
         self._context = self._defcon_app.engine.context
         self._shotgun = self._defcon_app.shotgun
         self._file_manager = DefconFileManager(self._defcon_app)
-
-        print(
-            self.get_cur_engine_default_config_from_shotgun("sg_maya_config_file")
-        )
+        self._default_config_data = self.get_cur_engine_default_config_from_shotgun()
 
 
     def get_cur_engine_default_config_file_path(self):
@@ -53,20 +55,19 @@ class DefConManager:
         return
 
 
-    def get_cur_engine_default_config_from_shotgun(self, sg_config_field):
+    def get_cur_engine_default_config_from_shotgun(self):
         """
         Returns the data from the default config file uplodaded 
         to shotgun DefaultConfig entity, we don't need to download the
         config file and can use the configuration directly.
 
-        sg_config_field: string : Engine configuration field name
-        examples: 
-            "sg_maya_config_file"
-            "sg_nuke_config_file"
-        
         return type: dict or None
 
         """
+
+        sg_engine_config_file_field = self._SG_ENGINE_CONFIG_FILE_FIELDS[
+            self._engine.name
+        ]
     
         project_id = self._context.project['id']
 
@@ -76,7 +77,7 @@ class DefConManager:
 
         fields = [
             "project",
-            sg_config_field
+            sg_engine_config_file_field
         ]
 
         
@@ -107,7 +108,7 @@ class DefConManager:
 
 
         # check if there's an uplodaded config file
-        if not data[sg_config_field]:
+        if not data[sg_engine_config_file_field]:
             self._defcon_app.log_error(
                 "No configuration file uploaded to the current engine."
                 "Please upload a valid configuration file and try again."
@@ -117,7 +118,7 @@ class DefConManager:
             return
 
         # check if uplodaded file is a yaml file
-        file_name = data[sg_config_field]['name']
+        file_name = data[sg_engine_config_file_field]['name']
         file_extension = file_name.split('.')[-1]
 
         if file_extension not in ["yml", "yaml"]:
@@ -132,7 +133,7 @@ class DefConManager:
         
         # we will use requests to get the default config file data
         # directly from the shotgun site
-        file_url = data[sg_config_field]['url']
+        file_url = data[sg_engine_config_file_field]['url']
         response = urllib.request.urlopen(file_url)
 
         # check request response
@@ -151,24 +152,19 @@ class DefConManager:
         return config
 
     
-    
-
-
     def get_stringed_config(self):
-        config = self.get_cur_engine_default_config()
-
         return yaml.dump(
-            config,
+            self._default_config_data,
             default_flow_style=False,
             sort_keys=False,
             indent=6
         )
 
-    def _log_warning_no_settings_found(self, settings_name, config_name):
+    def _log_warning_no_settings_found(self, settings_name):
         self._defcon_app.log_warning(
-            "No {} settings found in the {} file. "
+            "No {} settings found in the default config file. "
             "Defcon for common settings will be skipped."
-            .format(settings_name, config_name)
+            .format(settings_name)
         )
 
     
@@ -254,13 +250,11 @@ class MayaDefConManager(DefConManager):
                     )
 
 
-    def _configure_settings(self, settings_name, config):
-        settings = config.get(settings_name)
+    def _configure_settings(self, settings_name):
+        settings = self._default_config_data.get(settings_name)
 
         if not settings:
-            self._log_warning_no_settings_found(
-                settings_name, config
-            )
+            self._log_warning_no_settings_found(settings_name)
             return
         
 
@@ -279,8 +273,10 @@ class MayaDefConManager(DefConManager):
         Configure the image file prefix in the common render globals
         tab.
         """
-        config = self.get_cur_engine_default_config()
-        common_settings = config.get(self._COMMOM_SETTINGS_NAME)
+        common_settings = self._default_config_data.get(
+            self._COMMOM_SETTINGS_NAME
+        )
+
         default_render_globals = common_settings.get("defaultRenderGlobals")
         image_file_prefix_value = default_render_globals["defaults"]["imageFilePrefix"]
 
@@ -307,17 +303,11 @@ class MayaDefConManager(DefConManager):
             )
 
 
-    def configure_common_settings(self, config=None):
-        if config == None:
-            config = self.get_cur_engine_default_config()
-
-        self._configure_settings(self._COMMOM_SETTINGS_NAME, config)
+    def configure_common_settings(self):
+        self._configure_settings(self._COMMOM_SETTINGS_NAME)
 
 
-    def configure_redshift_settings(self, config=None):
-        if config == None:
-            config = self.get_cur_engine_default_config()
-
+    def configure_redshift_settings(self):
         if REDSHIFT_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
                 "Redshift plugin ({}) not loaded. "
@@ -326,13 +316,10 @@ class MayaDefConManager(DefConManager):
             )
             return
         
-        self._configure_settings(self._REDSHIFT_SETTINGS_NAME, config)
+        self._configure_settings(self._REDSHIFT_SETTINGS_NAME)
 
 
-    def configure_arnold_settings(self, config=None):
-        if config == None:
-            config = self.get_cur_engine_default_config()
-
+    def configure_arnold_settings(self):
         if ARNOLD_PLUGIN not in self._loaded_plugins:
             self._defcon_app.log_warning(
                 "Arnold ({}) plugin not loaded. "
@@ -342,28 +329,24 @@ class MayaDefConManager(DefConManager):
             )
             return
         
-        self._configure_settings(self._ARNOLD_SETTINGS_NAME, config)
+        self._configure_settings(self._ARNOLD_SETTINGS_NAME)
 
 
-    def configure_vray_settings(self, config=None):
-        if config == None:
-            config = self.get_cur_engine_default_config()
-
+    def configure_vray_settings(self):
         # TODO: Implement vray settings
+        pass
 
 
-    def configure_all_render_settings(self, config=None):
-        if config == None:
-            config = self.get_cur_engine_default_config()
+    def configure_all_render_settings(self):
 
         # Common settings
-        self.configure_common_settings(config)
+        self.configure_common_settings()
 
         # Arnold settings
-        self.configure_arnold_settings(config)
+        self.configure_arnold_settings()
 
         # Redshift settings
-        self.configure_redshift_settings(config)
+        self.configure_redshift_settings()
 
 
 
