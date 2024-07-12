@@ -5,6 +5,15 @@ import sgtk
 def resolve_image_file_prefix(engine, image_file_prefix):
     context = engine.context
 
+    if context.entity["type"] == "Asset":
+        # Replace {Shot} token with {Asset} token and
+        # remove {Sequence} token, if context is Asset.
+        tmp_string = image_file_prefix.replace("{Sequence}", "").replace("__", "_")
+        tmp_string = tmp_string.replace("{Shot}", "{Asset}")
+
+        image_file_prefix = tmp_string
+
+
     keys = {
         "Project": sgtk.StringKey("Project"),
         "Step": sgtk.StringKey("Step"),
@@ -33,9 +42,7 @@ def resolve_image_file_prefix(engine, image_file_prefix):
 
     }
 
-    if context.entity["type"] == "Asset":
-        fields["Shot"] = fields["Asset"]
-
+    
 
     template = sgtk.TemplateString(image_file_prefix, keys)
 
