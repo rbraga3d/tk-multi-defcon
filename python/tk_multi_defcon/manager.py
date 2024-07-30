@@ -1,16 +1,22 @@
 import urllib.request
+
 import maya.cmds as cmds
 import maya.mel as mel
 
 from tank_vendor import yaml
 
-from .constants import (
-    ENTITY_DEFAULTCONFIG,
+
+from studio_kit.api.shotgun.constants import (
+    ENTITY_DEFAULTCONFIG
+)
+
+from studio_kit.hosts.maya.lib.constants import (
     ARNOLD_PLUGIN,
     REDSHIFT_PLUGIN
 )
-
-from studio_kit.hosts.maya.lib.utils import ensure_arnold_nodes_exist
+from studio_kit.hosts.maya.lib.utils import (
+    ensure_arnold_nodes_exist
+)
 
 from .file_manager import DefconFileManager
 from .utils import resolve_image_file_prefix
@@ -18,7 +24,7 @@ from .utils import resolve_image_file_prefix
 
 class DefConManager:
 
-    _SG_ENGINE_CONFIG_FILE_FIELDS = {
+    _ENGINE_CONFIG_FILE_SG_FIELD_NAMES = {
         "tk-maya": "sg_maya_config_file"
     }
 
@@ -68,7 +74,7 @@ class DefConManager:
 
         """
 
-        sg_engine_config_file_field = self._SG_ENGINE_CONFIG_FILE_FIELDS[
+        sg_engine_config_file_field = self._ENGINE_CONFIG_FILE_SG_FIELD_NAMES[
             self._engine.name
         ]
     
