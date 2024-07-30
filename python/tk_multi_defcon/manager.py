@@ -1,5 +1,4 @@
 import urllib.request
-from pprint import pprint
 import maya.cmds as cmds
 import maya.mel as mel
 
@@ -10,6 +9,9 @@ from .constants import (
     ARNOLD_PLUGIN,
     REDSHIFT_PLUGIN
 )
+
+from studio_kit.hosts.maya.lib.utils import ensure_arnold_nodes_exist
+
 from .file_manager import DefconFileManager
 from .utils import resolve_image_file_prefix
 
@@ -27,6 +29,7 @@ class DefConManager:
         self._shotgun = self._defcon_app.shotgun
         self._file_manager = DefconFileManager(self._defcon_app)
         self._default_config_data = self.get_cur_engine_default_config_from_shotgun()
+
 
 
     def get_cur_engine_default_config_file_path(self):
@@ -326,6 +329,10 @@ class MayaDefConManager(DefConManager):
             )
             return
         
+
+        # ensure Arnold nodes exist
+        ensure_arnold_nodes_exist()
+
         self._configure_settings(self._ARNOLD_SETTINGS_NAME)
 
 
